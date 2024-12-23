@@ -4,8 +4,7 @@ import ThreeJSScene from "@/components/ThreeScene";
 export default function Home() {
   return (
     <div>
-      <App />
-      {/* <ThreeJSScene /> */}
+      <ThreeJSScene />
     </div>
   );
 }
