@@ -4,23 +4,7 @@ import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import gsap from "gsap";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { CustomShaderPlane } from "./LensShader";
-
-// Plane Component
-function BackgroundPlane() {
-  const { viewport } = useThree();
-
-  return (
-    <group>
-      <mesh rotation={[0, 0, 0]} position={[0, 0, -3]}>
-        {/* <planeGeometry args={[viewport.width, viewport.height]} /> */}
-        <meshStandardMaterial transparent opacity={0.6} />
-        <ambientLight intensity={0.1} />
-      </mesh>
-      <fog attach="fog" args={["#3c3c5d", 0, 25]} />
-    </group>
-  );
-}
+import { SmokeShaderPlane } from "./Smoke";
 
 // Point Light Component
 function InteractiveLight() {
@@ -161,11 +145,9 @@ function ThreeJSScene() {
       }}
       camera={{ position: [0, 0, 6] }}
     >
-      {/* <CustomShaderPlane /> */}
       <AnimatedObject />
       <InteractiveLight />
-      <BackgroundPlane />
-      <CustomShaderPlane />
+      <SmokeShaderPlane />
     </Canvas>
   );
 }
