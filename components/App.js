@@ -6,8 +6,25 @@ import gsap from "gsap";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { SmokeShaderPlane } from "./Smoke";
 
+// Plane Component
+function BackgroundPlane() {
+  const { viewport } = useThree();
+
+  return (
+    <group>
+      <mesh rotation={[0, 0, 0]} position={[0, 0, -3]} transparent={true}>
+        <planeGeometry args={[60, 60]} />
+        <meshStandardMaterial transparent opacity={0.8} 
+        />
+        <ambientLight intensity={0.1} />
+      </mesh>
+      <fog attach="fog" args={["#3c3c5d", 0, 25]} />
+    </group>
+  );
+}
+
 // Point Light Component
-function InteractiveLight() {
+function InteractiveLight({ lightPosUniform  }) {
   const lightRef = useRef();
   const { viewport, mouse } = useThree();
 
@@ -17,6 +34,13 @@ function InteractiveLight() {
 
     lightRef.current.position.set(x, y, 4);
     lightRef.current.rotation.set(-y, x, 4);
+
+    const lightPos = new THREE.Vector3(x, y, 4);
+
+    // Update the shader uniform
+    if (lightPosUniform && lightPosUniform.value) {
+      lightPosUniform.value.copy(lightPos);
+    }
   });
 
   return (
@@ -134,6 +158,8 @@ function AnimatedObject() {
 
 // Main 3D Scene Component
 function ThreeJSScene() {
+  const lightPosUniform = useRef(new THREE.Vector3(0, 0, 10));
+
   return (
     <Canvas
       style={{
@@ -146,8 +172,9 @@ function ThreeJSScene() {
       camera={{ position: [0, 0, 6] }}
     >
       <AnimatedObject />
-      <InteractiveLight />
-      <SmokeShaderPlane />
+      <InteractiveLight lightPosUniform={lightPosUniform.current} />
+      {/* <BackgroundPlane /> */}
+      <SmokeShaderPlane lightPosUniform={lightPosUniform} />
     </Canvas>
   );
 }

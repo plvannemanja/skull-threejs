@@ -13,7 +13,7 @@ export const SmokeShaderPlane = () => {
   });
 
   return (
-    <mesh ref={planeRef}>
+    <mesh ref={planeRef} position={[0, 0, -2]}>
       <fog attach="fog" args={["#3c3c5d", 0, 25]} />
       <ambientLight intensity={0.1} />
 
@@ -21,13 +21,23 @@ export const SmokeShaderPlane = () => {
       <shaderMaterial
         vertexShader={`
           varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+
           void main() {
             vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           }
         `}
         fragmentShader={`
           varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+
+          uniform vec3 u_lightPos;
+
           uniform float u_time;
 
           // Simplex Noise Functions
@@ -108,11 +118,21 @@ export const SmokeShaderPlane = () => {
             float fog = snoise(vec3(uv * 3.0, u_time * 0.2));
             vec3 smokeColor = vec3(0.2, 0.2, 0.2); // Dark grey color
             vec3 color = mix(vec3(0.0), smokeColor, fog * 0.5 + 0.5); // Blend smoke with dark grey
+            
+            // Light influence
+            vec3 lightDir = normalize(u_lightPos - vPosition);
+            float diff = max(dot(vNormal, lightDir), 0.0);
+          
+            // Add white blur effect
+            float distanceToLight = length(u_lightPos - vPosition);
+            float blur = smoothstep(0.0, 2.0, 2.0 - distanceToLight / 10.0);
+            color += blur * vec3(1.0); // Add white blur
             gl_FragColor = vec4(color, 1.0);
           }
         `}
         uniforms={{
           u_time: { value: 0 },
+          u_lightPos: { value: new THREE.Vector3(0, 0, 10) },
         }}
         side={THREE.DoubleSide}
       />
